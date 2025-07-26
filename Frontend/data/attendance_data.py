@@ -2,7 +2,7 @@ import pandas as pd
 import streamlit as st
 import requests
 
-API_URL = "http://127.0.0.1:8000/attendance"
+API_URL = "http://127.0.0.1:8000/api/attendance"
 
 def initialize_state():
     """Initialize the attendance data in session state"""

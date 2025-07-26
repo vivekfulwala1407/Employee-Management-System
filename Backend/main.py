@@ -1,7 +1,8 @@
 from fastapi import FastAPI, APIRouter, HTTPException, UploadFile , File
 from config import collection, attendance_collection
 from database.models import Emp, AttendanceRecord
-from database.schemas import all_employees, individual_employee, individual_serial, list_serial, parse_time
+from database.schemas import all_employees, individual_employee, list_serial, parse_time, individual_serial
+# from database.schemas import  individual_attendance, all_attendance
 import csv
 from io import StringIO
 from datetime import datetime
@@ -9,7 +10,7 @@ from typing import List
 
 app = FastAPI()
 # router = APIRouter()
-router = APIRouter(prefix="/api", tags=["Attendance"])
+router = APIRouter(prefix="/api", tags=["emp"])
 
 # @router.get("/")
 # async def read_root():
@@ -76,13 +77,11 @@ async def delete_employee(empId: str):
 
 @router.get("/attendance", response_model=List[dict])
 async def get_all_attendance():
-    """Get all attendance records"""
     attendances = attendance_collection.find()
     return list_serial(attendances)
 
 @router.get("/attendance/{employee_id}", response_model=dict)
 async def get_employee_attendance(employee_id: str):
-    """Get attendance for specific employee"""
     attendance = attendance_collection.find_one({"employee_id": employee_id})
     if not attendance:
         raise HTTPException(status_code=404, detail="Employee not found")
@@ -90,7 +89,6 @@ async def get_employee_attendance(employee_id: str):
 
 @router.post("/attendance/upload", status_code=201)
 async def upload_attendance(file: UploadFile = File(...)):
-    """Upload attendance records via CSV"""
     try:
         contents = await file.read()
         csv_data = StringIO(contents.decode('utf-8'))
@@ -101,16 +99,14 @@ async def upload_attendance(file: UploadFile = File(...)):
             try:
                 record = {
                     "employee_id": row["employee_id"].strip(),
-                    "login_date": row["login_date"].strip(),  # Keep as string
+                    "login_date": row["login_date"].strip(),
                     "log_in_time": parse_time(row["log_in_time"].strip()),
                     "log_out_time": parse_time(row["log_out_time"].strip())
                 }
                 records.append(record)
+
             except Exception as e:
-                raise HTTPException(
-                    status_code=422,
-                    detail=f"Error in row: {str(e)}"
-                )
+                raise HTTPException(status_code=422, detail=f"Error in row: {str(e)}")
         
         if records:
             result = attendance_collection.insert_many(records)
@@ -120,59 +116,9 @@ async def upload_attendance(file: UploadFile = File(...)):
             }
     
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error processing file: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
     finally:
         await file.close()
-# @router.get("/attendance")
-# async def get_attendance():
-#     att = attendance_collection.find( )
-#     return all_attendance(att)
-
-# @router.get("/attendance/{employee_id}")
-# async def get_attendance_by_employee(employee_id: str):
-#     att = attendance_collection.find_one({"employee_id": employee_id})
-#     if att:
-#         return individual_attendance(att)
-#     raise HTTPException(status_code=404, detail="Attendance record not found")
-
-# @router.post("/attendance")
-# async def create_attendance(attendance_record: AttendanceRecord):
-#     try:
-#         att_dict = attendance_record.dict()
-#         att_dict["login_date"] = str(att_dict["login_date"])
-#         data = attendance_collection.insert_one(att_dict)
-#         return {"status_code": 200, "attendance_id": str(data.inserted_id)}
-#     except Exception as e:
-#         raise HTTPException(status_code=400, detail=f"Some error occurred: {e}")
-
-# @router.post("/attendance")
-# async def upload_file(file: UploadFile = File(...)):
-#     try:
-#         contents = await file.read()
-#         s = StringIO(contents.decode("utf-8"))
-#         reader = csv.DictReader(s)
-#         print("Fieldnames:", reader.fieldnames)
-#         data = {}
-#         for row in reader:
-#             key = row.get("employee_id")
-#             if not key:
-#                 raise HTTPException(status_code=422, detail="Missing 'employee_id' column")
-#             data[key] = row
-#         return data
-#         # if not data:
-#         #     raise HTTPException(status_code=400, detail="No valid attendance records found")
-        
-#         # attendance_collection.insert_many(data)
-#         # s.close()
-#         # file.close
-#         return {"message": "Attendance uploaded", "records": data}
-#     except Exception as e:
-#         raise HTTPException(status_code=422, detail=f"Error while reading file: {e}")
-
-
 
 app.include_router(router)
    # will get the data from the file and convert it to our format suppose JSON format

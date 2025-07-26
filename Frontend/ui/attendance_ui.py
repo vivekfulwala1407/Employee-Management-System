@@ -4,7 +4,7 @@ from data import employee_data, attendance_data
 import requests
 import time
 
-API_URL = "http://127.0.0.1:8000/attendance"
+API_URL = "http://127.0.0.1:8000/api/attendance"
 
 def render_attendance_tab():
     employee_data.initialize_state()
@@ -29,7 +29,7 @@ def render_attendance_tab():
                     st.error("Failed to store data.")
             time.sleep(1.5)
             success.empty()
-            # st.dataframe(df)
+            st.dataframe(df)
         elif uploaded_file.name.endswith((".xls", ".xlsx")):
             df = pd.read_excel(uploaded_file, engine='openpyxl')
             success = st.success("Excel File Loaded Successfully!")

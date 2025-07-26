@@ -3,7 +3,7 @@ import pandas as pd
 import streamlit as st
 import requests
 
-API_URL = "http://127.0.0.1:8000/employees"
+API_URL = "http://127.0.0.1:8000/api/employees"
 
 def initialize_state():
     if "employees" not in st.session_state:

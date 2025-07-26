@@ -3,7 +3,7 @@ import streamlit as st
 from data import employee_data
 import requests
 
-API_URL = "http://127.0.0.1:8000/employees"
+API_URL = "http://127.0.0.1:8000/api/employees"
 
 def render_employee_tab():
     employee_data.initialize_state()
