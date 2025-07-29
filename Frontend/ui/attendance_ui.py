@@ -18,8 +18,10 @@ def render_attendance_tab():
         try:
             if uploaded_file.name.endswith(".csv"):
                 df = pd.read_csv(uploaded_file)
-            elif uploaded_file.name.endswith((".xlsx", ".xls")):
-                df = pd.read_excel(uploaded_file)
+            elif uploaded_file.name.endswith(".xlsx"):
+                df =  pd.read_excel(uploaded_file, engine="openpyxl")
+            elif uploaded_file.name.endswith(".xls"):
+                df = pd.read_excel(uploaded_file, engine="xlrd")
             else:
                 err = st.error("Unsupported file format. Please upload a .csv or Excel file.")
                 time.sleep(1.5)
