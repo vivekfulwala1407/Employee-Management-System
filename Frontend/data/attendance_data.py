@@ -5,31 +5,50 @@ import requests
 API_URL = "http://127.0.0.1:8000/api/attendance"
 
 def initialize_state():
-    """Initialize the attendance data in session state"""
+    try:
+        response = requests.get(API_URL)
+        if response.status_code == 200:
+            attendance_data = response.json()
+            if attendance_data:
+                st.session_state.attendance = pd.DataFrame(attendance_data)
+            else:
+                st.session_state.attendance = pd.DataFrame(columns=[
+                    "empId", 
+                    "name",
+                    "login_date", 
+                    "log_in_time", 
+                    "log_out_time"
+                ])
+        else:
+            st.error("Failed to load attendance data from API.")
+            st.session_state.attendance = pd.DataFrame(columns=[
+                "empId", 
+                "name",
+                "login_date", 
+                "log_in_time", 
+                "log_out_time"
+            ])
+    except Exception as e:
+        st.error(f"Error loading attendance data: {str(e)}")
+        st.session_state.attendance = pd.DataFrame(columns=[
+            "empId", 
+            "name",
+            "login_date", 
+            "log_in_time", 
+            "log_out_time"
+        ])
 
-    response = requests.get(API_URL)
-    if response.status_code == 200:
-        st.session_state.attendance = pd.DataFrame(response.json())
-    else:
-        st.error("Failed to load attendance data from API.")
-    # if "attendance" not in st.session_state:
-    #     st.session_state.attendance = pd.DataFrame(columns=[
-    #         "employee_id", 
-    #         "login_date", 
-    #         "log_in_time", 
-    #         "log_out_time"
-    #     ])
-
-    # if "show_upload_form" not in st.session_state:
-    #     st.session_state.show_upload_form = False
+    if "show_upload_form" not in st.session_state:
+        st.session_state.show_upload_form = False
 
 def add_attendance(employee_id, login_date, log_in_time, log_out_time):
-    """Add new attendance record to local session state"""
     new_entry = {
-        "employee_id": employee_id,
+        "empId": employee_id,
+        "name": "Manual Entry",
         "login_date": login_date,
         "log_in_time": log_in_time,
-        "log_out_time": log_out_time
+        "log_out_time": log_out_time,
+        "status": "manual"
     }
     
     new_df = pd.DataFrame([new_entry])
@@ -39,7 +58,6 @@ def add_attendance(employee_id, login_date, log_in_time, log_out_time):
     )
 
 def process_uploaded_file(file):
-    """Process uploaded CSV/Excel file and add to attendance records"""
     try:
         if file.name.endswith('.csv'):
             df = pd.read_csv(file)
@@ -51,6 +69,10 @@ def process_uploaded_file(file):
         required_columns = ["employee_id", "login_date", "log_in_time", "log_out_time"]
         if not all(col in df.columns for col in required_columns):
             raise ValueError("Missing required columns in uploaded file")
+        
+        df["status"] = "uploaded"
+        df.rename(columns={"employee_id": "empId"}, inplace=True)
+        df["name"] = "Unknown" 
         
         st.session_state.attendance = pd.concat(
             [st.session_state.attendance, df],
@@ -69,8 +91,10 @@ def get_attendance_records():
 def clear_attendance_data():
     """Clear all attendance records"""
     st.session_state.attendance = pd.DataFrame(columns=[
-        "employee_id", 
+        "empId", 
+        "name",
         "login_date", 
         "log_in_time", 
-        "log_out_time"
+        "log_out_time",
+        "status"
     ])

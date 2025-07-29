@@ -24,6 +24,31 @@ def individual_serial(attendance) -> dict:
 def list_serial(attendances) -> List[dict]:
     return [individual_serial(attendance) for attendance in attendances]
 
+def enriched_attendance_serial(attendance) -> dict:
+    employee_details = attendance.get("employee_details", [])
+    
+    if employee_details:
+        emp = employee_details[0]
+        return {
+            "empId": emp.get("empId", ""),
+            "name": emp.get("name", ""),
+            "login_date": str(attendance["login_date"]),
+            "log_in_time": attendance["log_in_time"],
+            "log_out_time": attendance["log_out_time"]
+        }
+    else:
+        original_id = attendance.get("original_employee_id", attendance.get("employee_id", ""))
+        return {
+            "empId": str(original_id),
+            "name": "Unknown Employee",
+            "login_date": str(attendance["login_date"]),
+            "log_in_time": attendance["log_in_time"],
+            "log_out_time": attendance["log_out_time"]
+        }
+
+def all_enriched_attendance(attendances) -> List[dict]:
+    return [enriched_attendance_serial(attendance) for attendance in attendances]
+
 def parse_time(time_str: str) -> str:
     try:
         dt = datetime.strptime(time_str.upper(), "%I:%M %p")

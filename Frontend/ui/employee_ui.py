@@ -16,6 +16,48 @@ def render_employee_tab():
             st.session_state.show_add_form = True
             st.session_state.edit_index = None
 
+    if "show_delete_modal" in st.session_state and st.session_state.show_delete_modal:
+        emp_name = st.session_state.get("delete_emp_name", "Unknown")
+        emp_id = st.session_state.get("delete_emp_id", "Unknown")
+        
+        st.markdown("---")
+        st.warning("Confirm Delete")
+        st.write(f"Are you sure you want to delete employee {emp_name} (ID: {emp_id})?")
+        
+        col_yes, col_no, col_space = st.columns([1, 2, 6])
+        
+        with col_yes:
+            if st.button("Yes"):
+                index = st.session_state.delete_index
+                response = requests.delete(f"{API_URL}/{emp_id}")
+                if response.status_code == 200:
+                    st.success("Employee deleted successfully!")
+                    employee_data.delete_employee(index)
+                else:
+                    st.error("Failed to delete employee.")
+                
+                st.session_state.show_delete_modal = False
+                if "delete_emp_name" in st.session_state:
+                    del st.session_state.delete_emp_name
+                if "delete_emp_id" in st.session_state:
+                    del st.session_state.delete_emp_id
+                if "delete_index" in st.session_state:
+                    del st.session_state.delete_index
+                st.rerun()
+        
+        with col_no:
+            if st.button("Cancel"):
+                st.session_state.show_delete_modal = False
+                if "delete_emp_name" in st.session_state:
+                    del st.session_state.delete_emp_name
+                if "delete_emp_id" in st.session_state:
+                    del st.session_state.delete_emp_id
+                if "delete_index" in st.session_state:
+                    del st.session_state.delete_index
+                st.rerun()
+        
+        st.markdown("---")
+
     if st.session_state.show_add_form and st.session_state.edit_index is None:
         with st.form("add_form", clear_on_submit=True):
             empId = st.text_input("Employee ID")
@@ -39,13 +81,13 @@ def render_employee_tab():
                     st.session_state.show_add_form = False
                     st.rerun()
                 else:
-                    st.warning("Please fill in both fields.")
+                    st.warning("Please fill in all fields correctly.")
 
     if not st.session_state.employees.empty:
         st.subheader("Employee List")
 
         for index, row in st.session_state.employees.iterrows():
-            col1, col2, col3, col4, col5, col6, col7 = st.columns([2, 2, 2, 2, 1, 1, 1])
+            col1, col2, col3, col4, col5, col6, col7 = st.columns([2, 2, 2, 2, 2, 1, 1])
 
             if st.session_state.edit_index == index:
                 with col1:
@@ -73,11 +115,11 @@ def render_employee_tab():
                             st.success("Employee updated successfully!")
                         employee_data.update_employee(index, new_empId, new_name, new_join_date, new_status, new_domain)
                         st.session_state.edit_index = None
-                        st.success("Employee updated!")
                         st.rerun()
                 with col7:
                     if st.button("❌", key=f"cancel_{index}"):
                         st.session_state.edit_index = None
+                        st.rerun()
 
             else:
                 col1.write(row["empId"])
@@ -86,36 +128,14 @@ def render_employee_tab():
                 col4.write(row["status"])
                 col5.write(row["domain"])
                 with col6:
-                    if st.button("🖊️",key=f"edit_{index}"):
+                    if st.button("🖊️", key=f"edit_{index}"):
                         st.session_state.edit_index = index
                         st.session_state.show_add_form = False
-                        st.success("Details Edited...")
                         st.rerun()
                 with col7:
-                    if st.button("␥", key=f"delete_{index}"):
-                        st.session_state.confirm_delete_Index = index
-                        st.session_state.confirm_delete_empId = row["empId"]
-
-                    
-        if "confirm_delete_Index" in st.session_state:
-            index = st.session_state.confirm_delete_Index
-            empId = st.session_state.confirm_delete_empId
-            st.warning(f"Are you sure you want to delete employee {empId}?")
-            col_confirm, col_cancel = st.columns([1, 1])
-            with col_confirm:
-                if st.button("Yes", key=f"confirm_yes_{empId}"):
-                    response = requests.delete(f"{API_URL}/{empId}")
-                    if response.status_code != 200:
-                        st.error("Failed to delete employee.")
-                    else:
-                        st.success("Employee deleted successfully!")
-                        employee_data.delete_employee(index)
-                    del st.session_state.confirm_delete_Index
-                    del st.session_state.confirm_delete_empId
-                    st.rerun()
-            with col_cancel:
-                if st.button("No", key=f"confirm_no_{empId}"):
-                    del st.session_state.confirm_delete_Index
-                    del st.session_state.confirm_delete_empId
-                    st.rerun()
-
+                    if st.button("🗑️", key=f"delete_{index}"):
+                        st.session_state.show_delete_modal = True
+                        st.session_state.delete_emp_name = row["name"]
+                        st.session_state.delete_emp_id = row["empId"]
+                        st.session_state.delete_index = index
+                        st.rerun()
