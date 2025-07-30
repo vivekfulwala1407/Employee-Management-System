@@ -7,3 +7,4 @@ if tab == "Employees":
     employee_ui.render_employee_tab()
 elif tab == "Attendance":
     attendance_ui.render_attendance_tab()
+

@@ -41,3 +41,8 @@ def initialize_state():
     if "show_upload_form" not in st.session_state:
         st.session_state.show_upload_form = False
     
+    if "filtered_data" not in st.session_state:
+        st.session_state.filtered_data = None
+    
+    if "show_filtered" not in st.session_state:
+        st.session_state.show_filtered = False

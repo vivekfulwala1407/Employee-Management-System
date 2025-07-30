@@ -9,3 +9,4 @@ db = client.emp
 
 collection = db["employees"]
 attendance_collection = db["attendance"]
+

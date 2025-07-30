@@ -1,5 +1,5 @@
 from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File
-from config import collection, attendance_collection
+from config import collection, attendance_collection, db
 from database.models import Emp, AttendanceRecord
 from database.schemas import all_employees, individual_employee, list_serial, parse_time, individual_serial, enriched_attendance_serial, all_enriched_attendance
 from pymongo import errors as pymongo_errors
@@ -27,10 +27,16 @@ async def get_employee(empId: str):
 @router.post("/employees")
 async def create_employee(emp: Emp):
     try:
+        existing_emp = collection.find_one({"empId": emp.empId})
+        if existing_emp:
+            raise HTTPException(status_code=400, detail=f"Employee ID '{emp.empId}' already exists. Please use a different ID.")
         emp_dict = emp.dict()
         emp_dict["join_date"] = str(emp_dict["join_date"])
         data = collection.insert_one(emp_dict)
         return {"status_code": 200, "empId": str(data.inserted_id)}
+    
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Some error occurred: {e}")
 

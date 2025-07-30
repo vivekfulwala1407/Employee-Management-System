@@ -67,21 +67,27 @@ def render_employee_tab():
             domain = st.text_input("Domain")
             submitted = st.form_submit_button("Add")
             if submitted:
-                response = requests.post(f"{API_URL}", json={
-                    "empId": empId,
-                    "name": name,
-                    "join_date": str(join_date),
-                    "status": status,
-                    "domain": domain
-                })
-                if response.status_code == 200:
-                    employee_data.add_employee(empId, name, join_date, status, domain)
-                    st.success("Employee added!")
-                    time.sleep(1)
-                    st.session_state.show_add_form = False
-                    st.rerun()
+                if not empId or not name or not domain:
+                    st.error("Please fill in all required fields!")
                 else:
-                    st.warning("Please fill in all fields correctly.")
+                    response = requests.post(f"{API_URL}", json={
+                        "empId": empId,
+                        "name": name,
+                        "join_date": str(join_date),
+                        "status": status,
+                        "domain": domain
+                    })
+                    if response.status_code == 200:
+                        employee_data.add_employee(empId, name, join_date, status, domain)
+                        st.success("Employee added successfully!")
+                        time.sleep(1)
+                        st.session_state.show_add_form = False
+                        st.rerun()
+                    elif response.status_code == 400:
+                        error_detail = response.json().get("detail", "Employee ID already exists!")
+                        st.error(error_detail)
+                    else:
+                        st.error("Failed to add employee. Please try again.")
 
     if not st.session_state.employees.empty:
         st.subheader("Employee List")
@@ -117,7 +123,7 @@ def render_employee_tab():
                         st.session_state.edit_index = None
                         st.rerun()
                 with col7:
-                    if st.button("❌", key=f"cancel_{index}"):
+                    if st.button("╳", key=f"cancel_{index}"):
                         st.session_state.edit_index = None
                         st.rerun()
 
