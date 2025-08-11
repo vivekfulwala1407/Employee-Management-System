@@ -6,7 +6,7 @@ A comprehensive, secure employee management system with role-based authenticatio
 
 ### 1. Clone the Repository
 
-git clone https://github.com/vivekfulwala1407/Employee-Management-System.git \n
+git clone https://github.com/vivekfulwala1407/Employee-Management-System.git  
 cd employee-management-system
 
 
