@@ -3,7 +3,7 @@ from pymongo.server_api import ServerApi
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 from fastapi import HTTPException
 
-uri = "mongodb+srv://vivek:vivek123@python.vq682u3.mongodb.net/?retryWrites=true&w=majority&appName=Python"
+uri = "mongodb+srv://<username>:<password>@python.vq682u3.mongodb.net/?retryWrites=true&w=majority&appName=Python"
 
 client = None
 db = None
