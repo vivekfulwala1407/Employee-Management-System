@@ -38,5 +38,5 @@ def update_employee(index, empId, name, join_date, status, domain):
     st.session_state.employees.loc[index, "domain"] = domain
 
 def delete_employee(index):
-    st.session_state.employees.drop(index, inplace=True)
-    st.session_state.employees.reset_index(drop=True, inplace=True)
+    st.session_state.employees.loc[index, "status"] = "Inactive"
+

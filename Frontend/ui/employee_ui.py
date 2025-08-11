@@ -21,8 +21,7 @@ def render_employee_tab():
         emp_id = st.session_state.get("delete_emp_id", "Unknown")
         
         st.markdown("---")
-        st.warning("Confirm Delete")
-        st.write(f"Are you sure you want to delete employee {emp_name} (ID: {emp_id})?")
+        st.warning(f"Are you sure you want to remove employee {emp_name} ?")
         
         col_yes, col_no, col_space = st.columns([1, 2, 6])
         

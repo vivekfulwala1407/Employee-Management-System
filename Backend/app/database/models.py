@@ -13,3 +13,4 @@ class AttendanceRecord(BaseModel):
     login_date: str = Field(...)
     log_in_time: str = Field(...)
     log_out_time: str = Field(...)
+

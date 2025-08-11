@@ -60,7 +60,7 @@ def render_attendance_tab():
             elif uploaded_file.name.endswith(".xls"):
                 df = pd.read_excel(uploaded_file, engine="xlrd")
             else:
-                err = st.error("Unsupported file format. Please upload a .csv or Excel file.")
+                err = st.error("Unsupported file format. Please upload only csv or Excel file.")
                 time.sleep(1.5)
                 err.empty()
                 return
@@ -150,7 +150,7 @@ def render_attendance_tab():
         st.subheader("Attendance Records")
         
         if not st.session_state.filtered_data.empty:            
-            display_columns = ['empId', 'name', 'login_date', 'log_in_time', 'log_out_time']
+            display_columns = ['empId', 'name', 'login_date', 'log_in_time', 'log_out_time', 'working_hours']
             st.dataframe(
                 st.session_state.filtered_data[display_columns], 
                 use_container_width=True,
@@ -168,7 +168,7 @@ def render_attendance_tab():
         if not st.session_state.attendance.empty:
             st.info(f"Total {len(st.session_state.attendance)} attendance records")
             
-            display_columns = ['empId', 'name', 'login_date', 'log_in_time', 'log_out_time']
+            display_columns = ['empId', 'name', 'login_date', 'log_in_time', 'log_out_time', 'working_hours']
             st.dataframe(
                 st.session_state.attendance[display_columns], 
                 use_container_width=True,

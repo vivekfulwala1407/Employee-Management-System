@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+pymongo
+pydantic
+python-multipart
+python-dateutil
+streamlit
+streamlit-authenticator
+pandas
+requests
+python-dotenv
+PyYAML
+bcrypt
